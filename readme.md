@@ -1,1 +1,1 @@
-this is a windows defender tool made by ciscothehackergod
+these are some c++ stubs for muzzicrypter tool 
